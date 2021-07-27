@@ -1,5 +1,8 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from "./logo.svg";
+import "./App.css";
+import { vec2 } from "./kaboomV6/math";
+
+window.vec2 = vec2;
 
 function App() {
   return (
