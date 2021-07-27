@@ -196,4 +196,4 @@ function audioInit() {
   };
 }
 
-export default audioInit;
+export { audioInit };

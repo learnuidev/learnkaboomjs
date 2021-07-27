@@ -329,4 +329,4 @@ function appInit(gconf = {}) {
   };
 }
 
-export default appInit;
+export { appInit };
