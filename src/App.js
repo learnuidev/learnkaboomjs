@@ -1,13 +1,12 @@
 // testing
 import { vec2 } from "./kaboomV6/math";
-import { appInit } from "./kaboomV6/app";
-import { audioInit } from "./kaboomV6/audio";
-import { gfxInit, originPt } from "./kaboomV6/gfx";
+import kaboom from "./kaboomV6/kaboom";
 
 // console.log("app", appInit);
 // console.log("Audio", audioInit);
 // console.log("gfx", gfxInit);
 
+// kaboom();
 window.vec2 = vec2;
 
 function App() {

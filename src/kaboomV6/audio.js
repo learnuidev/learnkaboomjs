@@ -8,6 +8,8 @@ const MAX_SPEED = 3;
 const MIN_DETUNE = -1200;
 const MAX_DETUNE = 1200;
 
+console.log("BURP BYTES", burpBytes);
+
 // @ts-ignore
 
 function audioInit() {
@@ -28,15 +30,16 @@ function audioInit() {
 
   let burpBuf;
 
-  audio.ctx.decodeAudioData(
-    burpBytes.buffer.slice(0),
-    (buf) => {
-      burpBuf = buf;
-    },
-    () => {
-      throw new Error("failed to make burp");
-    }
-  );
+  // Disabled for now
+  // audio.ctx.decodeAudioData(
+  //   burpBytes.buffer.slice(0),
+  //   (buf) => {
+  //     burpBuf = buf;
+  //   },
+  //   () => {
+  //     throw new Error("failed to make burp");
+  //   }
+  // );
 
   // get / set master volume
   function volume(v) {
