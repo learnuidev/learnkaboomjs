@@ -66,6 +66,44 @@ const kaboom = (
     root: document.body,
   }
 ) => {
+  // CUSTOM CODE ===
+  let state = {
+    components: {},
+  };
+  const reg_comp = (id, comps) => {
+    let firstComp = comps[0];
+    if (Array.isArray(firstComp)) {
+      let calculatedComps = comps.map((comp) => {
+        if (!Array.isArray(comp)) {
+          return comp;
+        }
+        const [key, prop, propB] = comp;
+        switch (key) {
+          case "sprite":
+            return sprite(prop);
+          case "pos":
+            return pos(prop[0], prop[1]);
+          case "scale":
+            return scale(prop);
+          case "text":
+            return text(prop, propB);
+          default:
+            return {};
+        }
+      });
+
+      state.components[id] = add(calculatedComps);
+    } else {
+      const comp = add(comps);
+      state.components[id] = comp;
+    }
+  };
+
+  // window.reg_comp = reg_comp;
+  const get_comp = (id, defaultVal) => state.components[id] || defaultVal;
+
+  // CUSTOM CODE ===
+
   const app = appInit({
     width: gconf.width,
     height: gconf.height,
@@ -380,7 +418,7 @@ const kaboom = (
 
           // event / custom method
           if (typeof comp[k] === "function") {
-            const func = comp[k].bind(this);
+            const func = comp[k].bind(this, obj);
             if (COMP_EVENTS.has(k)) {
               this.on(k, func);
               continue;
@@ -2001,6 +2039,10 @@ const kaboom = (
     // storage
     getData,
     setData,
+    // custom
+    state,
+    reg_comp,
+    get_comp,
   };
 
   if (gconf.plugins) {

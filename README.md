@@ -1,70 +1,23 @@
-# Getting Started with Create React App
+# Learn and Understand KaboomJS
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+In this tutorial series, we will learn and understand the internals of KaboomJS. We will look at every namespace in the source code.
 
-## Available Scripts
+We will be using version 0.6 (this is the latest version as of 2021/07/28), but this will change as the time passes.
 
-In the project directory, you can run:
+## Introduction
 
-### `yarn start`
+KaboomJS is a JavaScript library for making interactive apps. you can make 2d games, slideshows etc..
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## KaboomJS 0.6 namespaces (9)
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+To view all the namespace go to src/kaboomV6. Number in parens represent LOC. This helps better understand which files are small/large
 
-### `yarn test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- app.js (332) - responsible for registering event handlers
+- assets.js (271) - loaders
+- audio.js (202) - audio module
+- gfx.js (825) - graphics (most complex)
+- kaboom.js (2151) - core library. we are importing this file when we use kaboom
+- logger.js (83)
+- math.js (587)
+- net.js (76) - multiplayer
+- utils.js (28) - contains one function called deepEq, which gets used in one file (gfx.js)
