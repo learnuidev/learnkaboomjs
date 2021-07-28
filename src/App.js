@@ -1,6 +1,5 @@
 // testing
 import kaboom from "./kaboomV6/kaboom";
-// import  { state, get_comp, reg_comp } from
 
 const k = kaboom({ canvas: document.getElementById("app"), global: true });
 k.loadRoot("https://kaboomjs.com/pub/examples/");
@@ -20,8 +19,9 @@ k.loadSound("sound/hit", "sounds/hit.mp3");
 
 // Two ways to write the game
 // Task: Convery this into data driven style
-k.reg_comp("ui/text", [k.text("oh hi", 32), k.pos(100, 100)]);
-k.reg_comp("ui/text", [
+// k.reg_comp("ui/text", [k.text("oh hi", 32), k.pos(100, 100)]);
+
+k.reg_comp("ui_text", [
   ["text", "oh hi", 32],
   ["pos", [100, 100]],
 ]);
@@ -34,22 +34,44 @@ k.reg_comp("player", [
   { getHealth: (player) => player.health },
 ]);
 
-k.keyDown("left", () => {
-  const player = k.get_comp("player");
+function key_down(id, cb) {
+  const handler = () => {
+    return cb(k.state.components);
+  };
+  return k.keyDown(id, handler);
+}
+
+// after ===
+key_down("left", ({ player, ui_text }) => {
   player.pos.x = player.pos.x - 10;
 });
-k.keyDown("right", () => {
-  const player = k.get_comp("player");
+key_down("right", ({ player }) => {
   player.pos.x = player.pos.x + 10;
 });
-k.keyDown("up", () => {
-  const player = k.get_comp("player");
+key_down("up", ({ player }) => {
   player.pos.y = player.pos.y - 10;
 });
-k.keyDown("down", () => {
-  const player = k.get_comp("player");
+key_down("down", ({ player }) => {
   player.pos.y = player.pos.y + 10;
 });
+
+// before ===
+// k.keyDown("left", () => {
+//   const player = k.get_comp("player");
+//   player.pos.x = player.pos.x - 10;
+// });
+// k.keyDown("right", () => {
+//   const player = k.get_comp("player");
+//   player.pos.x = player.pos.x + 10;
+// });
+// k.keyDown("up", () => {
+//   const player = k.get_comp("player");
+//   player.pos.y = player.pos.y - 10;
+// });
+// k.keyDown("down", () => {
+//   const player = k.get_comp("player");
+//   player.pos.y = player.pos.y + 10;
+// });
 
 function App() {
   return (
