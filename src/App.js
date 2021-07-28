@@ -6,7 +6,7 @@ kaboom({ canvas: document.getElementById("app") });
 function App() {
   return (
     <div className="App">
-      <div> Kaboom yoooooo</div>
+      <div> Kaboom</div>
     </div>
   );
 }
