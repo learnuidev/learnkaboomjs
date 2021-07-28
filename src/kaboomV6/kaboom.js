@@ -418,7 +418,7 @@ const kaboom = (
 
           // event / custom method
           if (typeof comp[k] === "function") {
-            const func = comp[k].bind(this, obj);
+            const func = comp[k].bind(this, state.components);
             if (COMP_EVENTS.has(k)) {
               this.on(k, func);
               continue;

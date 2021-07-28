@@ -31,9 +31,17 @@ k.reg_comp("player", [
   ["pos", [450, 100]],
   ["scale", 4],
   { health: 100 },
-  { getHealth: (player) => player.health },
+  {
+    getHealth: ({ player }) => {
+      return player.health;
+    },
+    setHealth: ({ player }, health) => {
+      return (player.health = health);
+    },
+  },
 ]);
 
+// better key-down
 function key_down(id, cb) {
   const handler = () => {
     return cb(k.state.components);
@@ -42,7 +50,7 @@ function key_down(id, cb) {
 }
 
 // after ===
-key_down("left", ({ player, ui_text }) => {
+key_down("left", ({ player }) => {
   player.pos.x = player.pos.x - 10;
 });
 key_down("right", ({ player }) => {
@@ -74,11 +82,7 @@ key_down("down", ({ player }) => {
 // });
 
 function App() {
-  return (
-    <div className="App">
-      <div> Kaboom JS</div>
-    </div>
-  );
+  return <div className="App"></div>;
 }
 
 export default App;
