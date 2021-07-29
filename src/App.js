@@ -42,24 +42,21 @@ k.reg_comp("player", [
 ]);
 
 // better key-down
-function key_down(id, cb) {
-  const handler = () => {
-    return cb(k.state.components);
-  };
-  return k.keyDown(id, handler);
+function keyDown(id, cb) {
+  return k.keyDown(id, cb.bind(null, k.state.components));
 }
 
 // after ===
-key_down("left", ({ player }) => {
+keyDown("left", ({ player }) => {
   player.pos.x = player.pos.x - 10;
 });
-key_down("right", ({ player }) => {
+keyDown("right", ({ player }) => {
   player.pos.x = player.pos.x + 10;
 });
-key_down("up", ({ player }) => {
+keyDown("up", ({ player }) => {
   player.pos.y = player.pos.y - 10;
 });
-key_down("down", ({ player }) => {
+keyDown("down", ({ player }) => {
   player.pos.y = player.pos.y + 10;
 });
 

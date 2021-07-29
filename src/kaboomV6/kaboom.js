@@ -2041,6 +2041,7 @@ const kaboom = (
     setData,
     // custom
     state,
+    game,
     reg_comp,
     get_comp,
   };
