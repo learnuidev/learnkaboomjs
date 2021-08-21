@@ -1,35 +1,3 @@
-import { mat4, vec3, vec4 } from "gl-matrix";
-
-// camera
-import { Camera } from "./camera";
-import { Scene } from "./scene";
-import { RenderObject, cube, pyramid } from "./gameObject";
-import {
-  cubeVertexArray,
-  cubeVertexCount,
-  triangleVertexCount,
-  triangleVertexArray,
-} from "./data";
-
-// TODO:
-// 1. camera.ts - done
-// 2. index.ts -
-// 3. objects.ts - DONE
-// 4. renderer.ts - DONE
-// 5. scene.ts - DONE
-// 5. vertices - DONE
-
-// `Module: 1: Camera ====`;
-
-// GLOBAL Objects
-
-//   (create-cube {:libs {:camera camera
-//                        :vec4 vec4
-//                        :vec3 vec3
-//                        :mat4 mat4}
-//                 : canvas(js / document.getElementById "app")
-// }))
-
 var GPUTextureUsage = window.GPUTextureUsage;
 
 // `Module 5: WebGPU Renderer ===`;
