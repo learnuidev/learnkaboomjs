@@ -522,6 +522,8 @@ export function patu() {
   camera.z = 7;
   const scene = new Scene();
 
+  window.scene = scene;
+
   const renderer = new WebGPURenderer();
   renderer.init(props.canvas).then((success) => {
     if (!success) return;
@@ -560,6 +562,8 @@ export function patu() {
     );
   }
 
+  window.addCube = addCube;
+
   function addPyramid() {
     scene.add(
       pyramid({
@@ -569,18 +573,10 @@ export function patu() {
     );
   }
 
-  // BUTTONS
-  const boxB = document.createElement("button");
-  boxB.textContent = "ADD BOX";
-  boxB.classList.add("cubeButton");
-  boxB.onclick = addCube;
-  document.body.appendChild(boxB);
+  // outputCanvas.canva.style = styles.join(";");
+  outputCanvas.setAttribute("tabindex", "0");
 
-  const pyramidB = document.createElement("button");
-  pyramidB.textContent = "ADD PYRAMID";
-  pyramidB.classList.add("pyramidButton");
-  pyramidB.onclick = addPyramid;
-  document.body.appendChild(pyramidB);
+  window.addPyramid = addPyramid;
 
   // MOUSE CONTROLS
 
@@ -601,6 +597,33 @@ export function patu() {
   outputCanvas.onmouseup = (event) => {
     mouseDown = false;
   };
+
+  // outputCanvas.onkeydown = (event) => {
+  //   console.log("event", event);
+  // };
+  // outputCanvas.onkeypress = (event) => {
+  //   console.log("event", event);
+  // };
+
+  outputCanvas.addEventListener("keydown", (evt) => {
+    console.log("RUNNER", evt);
+    if (evt.code === "ArrowUp") {
+      console.log("ZOOM IN");
+      camera.z -= 5;
+    } else if (evt.code === "ArrowDown") {
+      console.log("ZOOM OUT");
+      camera.z += 5;
+    } else if (evt.code === "ArrowLeft") {
+      camera.x -= 5;
+    } else if (evt.code === "ArrowRight") {
+      camera.x += 5;
+    }
+  });
+  outputCanvas.addEventListener("keypress", () => {
+    console.log("RUN yo");
+  });
+
+  window.canvas = outputCanvas;
 
   var lastMouseX = -1;
   var lastMouseY = -1;
@@ -627,7 +650,12 @@ export function patu() {
 
 function App() {
   patu();
-  return <div className="App"></div>;
+  return (
+    <div className="App">
+      <button onClick={window.addCircle}> Add Circle</button>
+      <button onClick={window.addPyramid}> Add Pyramid</button>
+    </div>
+  );
 }
 
 export default App;
