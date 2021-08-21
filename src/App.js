@@ -119,7 +119,7 @@ k.loadTiledMap("/example.json", terrain).then((val) => {
   // eventually, I will auto-load tags when I load the map.
 
   var levels2 = levels.slice(0, 5);
-  window.val = val;
+  window.state = val;
   for (let level of levels2) {
     k.addLevel(level, { width: 32, height: 32, ...key });
   }
