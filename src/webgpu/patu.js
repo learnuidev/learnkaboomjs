@@ -652,7 +652,7 @@ function App() {
   patu();
   return (
     <div className="App">
-      <button onClick={window.addCircle}> Add Circle</button>
+      <button onClick={window.addCube}> Add Circle</button>
       <button onClick={window.addPyramid}> Add Pyramid</button>
     </div>
   );
