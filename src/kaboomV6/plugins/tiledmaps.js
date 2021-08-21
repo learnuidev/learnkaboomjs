@@ -58,6 +58,8 @@ const mapsymbols = [...new Array(4052)].reduce((a, v, c) => {
   return [...a, String.fromCharCode(c)];
 }, []);
 
+window.mapsymbols = mapsymbols;
+
 function verifyTiledMap(mapObj) {
   // TODO: add more validation here
   if (!mapObj) {
@@ -112,6 +114,9 @@ const tiledMapPlugin = (k) => {
             levels: [],
             key: {},
           };
+
+          window.mapObj = mapObj;
+          window.tileSet = mapObj.tilesets[0];
 
           for (let tileset of mapObj.tilesets) {
             if (tileset.margin !== 0) {
