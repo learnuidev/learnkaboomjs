@@ -1,4 +1,4 @@
-import { mat4, vec3, vec4 } from "gl-matrix";
+import { mat4, vec3 } from "gl-matrix";
 
 // camera
 import {
@@ -9,15 +9,6 @@ import {
 } from "./data";
 
 // TODO:
-
-let props = {
-  libs: {
-    mat4,
-    vec3,
-    vec4,
-  },
-  canvas: document.getElementById("app"),
-};
 
 var GPUBufferUsage = window.GPUBufferUsage;
 
@@ -53,23 +44,6 @@ const positionOffset = 0;
 const colorOffset = 4 * 4; // Byte offset of object color attribute.
 const vertexSize = 4 * 10; // Byte size of one object.
 
-// export interface RenderObjectParameter {
-//   x?: number;
-//   y?: number;
-//   z?: number;
-//
-//   rotX?: number;
-//   rotY?: number;
-//   rotZ?: number;
-// }
-
-// return new RenderObject(
-//   this.device,
-//   cubeVertexArray,
-//   cubeVertexCount,
-//   parameter
-// );
-
 export function RenderObject(
   device,
   verticesArray,
@@ -90,7 +64,7 @@ export function RenderObject(
   this.offset = 256; // uniformBindGroup offset must be 256-byte aligned
   this.uniformBufferSize = this.offset + this.matrixSize;
 
-  this.modelViewProjectionMatrix = props.libs.mat4.create();
+  this.modelViewProjectionMatrix = mat4.create();
 
   // CONSTRUCTOR
   this.vertexCount = vertexCount;
@@ -205,7 +179,6 @@ RenderObject.prototype.draw = function (passEncoder, device, camera) {
 RenderObject.prototype.updateTransformationMatrix = function (
   cameraProjectionMatrix
 ) {
-  const { mat4, vec3 } = props.libs;
   // MOVE / TRANSLATE OBJECT
   const modelMatrix = mat4.create();
   mat4.translate(

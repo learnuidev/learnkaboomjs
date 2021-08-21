@@ -1,13 +1,4 @@
-import { mat4, vec3, vec4 } from "gl-matrix";
-
-let props = {
-  libs: {
-    mat4,
-    vec3,
-    vec4,
-  },
-  canvas: document.getElementById("app"),
-};
+import { mat4, vec3 } from "gl-matrix";
 
 export function Camera({ x, y, z, rotX, rotY, rotZ, fovy, aspect, near, far }) {
   this.x = x || 0;
@@ -25,8 +16,6 @@ export function Camera({ x, y, z, rotX, rotY, rotZ, fovy, aspect, near, far }) {
 }
 
 Camera.prototype.getViewMatrix = function () {
-  const { mat4, vec3 } = props.libs;
-
   let viewMatrix = mat4.create();
 
   mat4.lookAt(
@@ -43,7 +32,6 @@ Camera.prototype.getViewMatrix = function () {
 };
 
 Camera.prototype.getProjectionMatrix = function () {
-  const { mat4, vec3 } = props.libs;
   let projectionMatrix = mat4.create();
   mat4.perspective(
     projectionMatrix,
@@ -56,8 +44,6 @@ Camera.prototype.getProjectionMatrix = function () {
 };
 
 Camera.prototype.getCameraViewProjMatrix = function () {
-  const { mat4, vec3 } = props.libs;
-
   const viewProjMatrix = mat4.create();
   const view = this.getViewMatrix();
   const proj = this.getProjectionMatrix();

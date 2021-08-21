@@ -8,6 +8,10 @@ let device;
 
 // APP
 export function patu(props) {
+  if (!navigator.gpu) {
+    console.log("WEBGPU Not supported");
+    return "WEBGPU Not supported";
+  }
   const outputCanvas = props.canvas;
   outputCanvas.width = window.innerWidth;
   outputCanvas.height = window.innerHeight;
