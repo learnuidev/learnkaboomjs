@@ -51,14 +51,14 @@ const device = await adapter.requestDevice();
 
 export const device = {
   adapter: adapter,
-  // features: { size: 0 }, // GPUSupportedFeatures
-  // label: null,
-  // limits: adapter.limits,
-  // lost: Promise, // {<pending>}
-  // onuncapturederror: null,
+  features: { size: 0 }, // GPUSupportedFeatures
+  label: null,
+  limits: adapter.limits,
+  lost: Promise, // {<pending>}
+  onuncapturederror: null,
   queue: {
     // GPUQueue
-    // label: null,
+    label: null,
     copyExternalImageToTexture: () => copyExternalImageToTexture(),
     copyImageBitmapToTexture: () => copyImageBitmapToTexture(),
     onSubmittedWorkDone: () => onSubmittedWorkDone(),
