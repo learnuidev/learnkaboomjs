@@ -72,23 +72,21 @@ export const device = {
 
     Called on: GPUQueue this.
     Arguments:
-
-    Parameter	        Type	  Nullable	Optional
-    -
     1. buffer	(GPUBuffer)
-    - The buffer to write to.
-
+       - The buffer to write to.
     2. bufferOffset (GPUSize64)
-    - Offset in bytes into buffer to begin writing at. aka a number
-
+       - Offset in bytes into buffer to begin writing at. aka a number 
     3. data (BufferSource)
-    - Data to write into buffer.
-
-    4. dataOffset	(GPUSize64): Offset in into data to begin writing from. Given in elements if data is a TypedArray and bytes otherwise.
-    5. size (GPUSize64) - optional: Size of content to write from data to buffer.  Given in elements if data is a TypedArray and bytes otherwise.
+       - Data to write into buffer.
+    4. dataOffset	(GPUSize64)
+       - Offset in into data to begin writing from. 
+       - Given in elements if data is a TypedArray and bytes otherwise.
+    5. size (GPUSize64) -  optional 
+       - Size of content to write from data to buffer.  
+       - Given in elements if data is a TypedArray and bytes otherwise.
 
     // ================================= Detailed Example
-    Example 1
+    Example 1 ===
     import { mat4 } from 'gl-matrix';
 
     // Step 0: Data
