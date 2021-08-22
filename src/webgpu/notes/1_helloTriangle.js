@@ -108,3 +108,53 @@ const presentationSize = [
 const presentationFormat = context.getPreferredFormat(adapter);
 
 // 3.2 Configure swap chain
+context.configure({
+  device,
+  format: presentationFormat,
+});
+
+// 4 pipeline
+const pipeline = device.createRenderPipeline({
+  vertex: {
+    module: device.createShaderModule({
+      code: ``,
+    }),
+    entryPoint: "main",
+  },
+
+  fragment: {
+    module: device.createShaderModule({
+      code: ``,
+    }),
+    entryPoint: "main",
+    targets: [
+      {
+        format: presentationFormat,
+      },
+    ],
+  },
+  primitive: {
+    topology: "triangle-list",
+  },
+});
+
+// draw
+const commandEncoder = device.createCommandEncoder();
+const textureView = context.getCurrentTexture().createView();
+// GPURenderPassDescriptor
+const renderPassDescriptor = {
+  colorAttachments: [
+    {
+      view: textureView,
+      loadValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+      storeOp: "store",
+    },
+  ],
+};
+
+const renderPassEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
+renderPassEncoder.setPipeline(pipeline);
+renderPassEncoder.draw(3, 1, 0, 0);
+renderPassEncoder.endPass();
+
+device.queue.submit([commandEncoder.finish()]);

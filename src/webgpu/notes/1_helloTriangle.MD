@@ -305,7 +305,7 @@ export const device = {
 };
 ```
 
-### Step 3: Configure Swap Chain
+## Step 3: Configure Swap Chain
 
 ```js
 // Device Pixel Ratio, Presentation Format & Presentation Size
@@ -331,7 +331,7 @@ context.configure({
 
 ```
 
-### Step 4: Create Render Pipeline
+## Step 4: Create Render Pipeline
 
 ```js
 // Step 1: Get vertex and fragment shader code
@@ -376,7 +376,7 @@ const pipeline = device.createRenderPipeline({
 });
 ```
 
-### Step 5: Render Pass and Submit the work
+## Step 5: Render Pass and Submit the work
 
 ```js
 // Begins encoding a render pass described by descriptor.
@@ -399,4 +399,179 @@ renderPassEncoder.draw(3, 1, 0, 0);
 renderPassEncoder.endPass();
 
 device.queue.submit([commandEncoder.finish()]);
+```
+
+## Aside: GPURenderPassDescriptor (CommandEncoder)
+
+- describes the encoding of a render pass
+
+```js
+GPURenderPassDescriptor = {
+  colorAttachments: [
+    ` 
+  type: sequence<GPURenderPassColorAttachment>
+
+  The set of GPURenderPassColorAttachment values in this sequence defines which color attachments will be output to when executing this render pass.`,
+  ],
+  // other options
+  depthStencilAttachment: `
+  type: GPURenderPassDepthStencilAttachment
+
+  The GPURenderPassDepthStencilAttachment value that defines the depth/stencil attachment that will be output to and tested against when executing this render pass.
+  `,
+  occlusionQuerySet: `
+  type: GPUQuerySet
+
+  The GPUQuerySet value defines where the occlusion query results will be stored for this pass.
+  `,
+};
+```
+
+### Aside a: GPURenderPassColorAttachment
+
+```js
+textureView = context.getCurrentTexture().createView();
+backgroundColor = { r: 0, g: 0, b: 0, a: 1.0 };
+// GPURenderPassColorAttachment
+colorAttachment = {
+  view: textureView,
+  loadValue: backgroundColor,
+  storeOp: "store" || "discard",
+};
+
+GPURenderPassColorAttachment = {
+  view: `
+  view - GPUTextureView
+  A GPUTextureView describing the texture subresource that will be output to and read from for this depth/stencil attachment.
+  `,
+  loadValue: `
+  loadValue - type (GPULoadOp or GPUColor)
+  GPULoadOp
+  If a GPULoadOp, indicates the load operation to perform on view prior to executing the render pass. 
+  
+  GPUColor
+  If a GPUColor, indicates the value to clear view to prior to executing the render pass.
+  
+  `,
+  storeOp: `
+  storeOp - GPUStoreOp = "store
+  The store operation to perform on view after executing the render pass.
+
+  enum GPUStoreOp {
+    "store",
+    "discard"
+  };
+
+  `,
+  example: colorAttachment,
+};
+```
+
+### Aside b: GPURenderPassDepthStencilAttachment
+
+```rs
+dictionary GPURenderPassDepthStencilAttachment {
+    required GPUTextureView view;
+
+    required (GPULoadOp or float) depthLoadValue;
+    required (GPULoadOp or GPUStencilValue) stencilLoadValue;
+
+    required GPUStoreOp depthStoreOp;
+    required GPUStoreOp stencilStoreOp;
+
+    boolean depthReadOnly = false;
+    boolean stencilReadOnly = false;
+};
+
+```
+
+#### Explanation
+
+```js
+GPULoadOp = "load";
+textureView = context.getCurrentTexture().createView();
+
+depthStencilAttachment = {
+  view: textureView,
+  depthLoadValue: "load" || 0,
+  stencilLoadValue: "load" || 0, // typedef GPUStencilValue = unsigned long
+  depthStoreOp: "store" || "discard",
+  stencilStoreOp: "store" || "discard",
+};
+
+GPURenderPassDepthStencilAttachment = {
+  view: `
+  view of type GPUTextureView
+  A GPUTextureView describing the texture subresource that will be output to and read from for this depth/stencil attachment.
+
+  `,
+
+  depthLoadValue: `
+  depthLoadValue, of type (GPULoadOp or float)
+
+  If a GPULoadOp, indicates the load operation to perform on view's depth component prior to executing the render pass. If a float, indicates the value to clear view's depth component to prior to executing the render pass.
+
+  Note: It is recommended to prefer a clear-value; see "load".
+
+  `,
+
+  stencilLoadValue: `
+  stencilLoadValue, of type (GPULoadOp or GPUStencilValue)
+
+  If a GPULoadOp, indicates the load operation to perform on view's stencil component prior to executing the render pass. If a GPUStencilValue, indicates the value to clear view's stencil component to prior to executing the render pass.
+
+  `,
+  depthStoreOp: `
+  depthStoreOp, of type GPUStoreOp
+  The store operation to perform on view's depth component after executing the render pass.
+
+  Note: It is recommended to prefer a clear-value; see "load".
+
+  `,
+  stencilStoreOp: `
+  stencilStoreOp, of type GPUStoreOp
+  The store operation to perform on view's stencil component after executing the render pass.
+
+  `,
+  depthReadOnly: `
+  depthReadOnly, of type boolean, defaulting to false
+  Indicates that the depth component of view is read only.
+  `,
+  stencilReadOnly: `
+  stencilReadOnly, of type boolean, defaulting to false
+  Indicates that the stencil component of view is read only.
+`,
+};
+```
+
+### Aside c: GPUQuerySet (occlusionQuerySet)
+
+Occlusion queries
+
+These represent ways to detect whether an object is visible. Specifically, these queries detect whether any fragments continue being processed after reaching the depth test stage in the Per-Sample Processing part of the rendering pipeline.
+
+```rs
+// Type defs
+typedef [EnforceRange] unsigned long GPUSize32;
+
+dictionary GPUQuerySetDescriptor : GPUObjectDescriptorBase {
+    required GPUQueryType type;
+    required GPUSize32 count;
+    sequence<GPUPipelineStatisticName> pipelineStatistics = [];
+};
+
+enum GPUQueryType {
+    "occlusion",
+    "pipeline-statistics",
+    "timestamp"
+};
+
+enum GPUPipelineStatisticName {
+    "vertex-shader-invocations",
+    "clipper-invocations",
+    "clipper-primitives-out",
+    "fragment-shader-invocations",
+    "compute-shader-invocations"
+};
+
 ```
