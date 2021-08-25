@@ -77,8 +77,13 @@ function vec2(...args) {
       return this.x * p2.x + this.y + p2.y;
     },
     angle(...args) {
+      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/atan2
+      // The Math.atan2() function returns the angle in the plane
+      // (in radians) between the positive x - axis and the ray
+      // from(0, 0) to the point(x, y), for Math.atan2(y, x).`;
       const p2 = vec2(...args);
-      return Math.atan2(this.y - p2.y, this.x - p2.x);
+      const diffVec = this.sub(p2);
+      return Math.atan2(diffVec.y, diffVec.x);
     },
     lerp(p2, t) {
       return vec2(lerp(this.x, p2.x, t), lerp(this.y, p2.y, t));
