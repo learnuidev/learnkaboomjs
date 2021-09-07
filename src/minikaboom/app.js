@@ -70,7 +70,7 @@ export default function appInit(gconf) {
     realTime: 0,
     skipTime: false,
     dt: 0.0,
-    scale: gconf.scale ?? 1,
+    scale: gconf.scale || 1,
     isTouch: false,
     loopID: null,
     stopped: false,
