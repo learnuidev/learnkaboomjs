@@ -1,32 +1,32 @@
 import { vec2 } from "../kaboomV6/math";
 
-// const keyMap = {
-//   ArrowLeft: "left",
-//   ArrowRight: "right",
-//   ArrowUp: "up",
-//   ArrowDown: "down",
-//   " ": "space",
-// };
+const keyMap = {
+  ArrowLeft: "left",
+  ArrowRight: "right",
+  ArrowUp: "up",
+  ArrowDown: "down",
+  " ": "space",
+};
 
-// const preventDefaultKeys = [
-//   "space",
-//   "left",
-//   "right",
-//   "up",
-//   "down",
-//   "tab",
-//   "f1",
-//   "f2",
-//   "f3",
-//   "f4",
-//   "f5",
-//   "f6",
-//   "f7",
-//   "f8",
-//   "f9",
-//   "f10",
-//   "f11",
-// ];
+const preventDefaultKeys = [
+  "space",
+  "left",
+  "right",
+  "up",
+  "down",
+  "tab",
+  "f1",
+  "f2",
+  "f3",
+  "f4",
+  "f5",
+  "f6",
+  "f7",
+  "f8",
+  "f9",
+  "f10",
+  "f11",
+];
 
 function setFullScreen(gconf, app) {
   // full screen mode

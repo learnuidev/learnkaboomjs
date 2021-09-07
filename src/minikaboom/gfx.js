@@ -20,6 +20,7 @@ const STRIDE = 9;
 const QUEUE_COUNT = 65536;
 const BG_GRID_SIZE = 64;
 
+// uv = texture coordinate
 const VERT_TEMPLATE = `
 attribute vec3 a_pos;
 attribute vec2 a_uv;
@@ -163,15 +164,22 @@ export default function gfxInit(gl, gconf) {
     }
 
     return {
+      // 2. gets used in flush before this.bindAttribs()
+      // it is also used in send method below
       bind() {
         gl.useProgram(id);
       },
 
+      // 3. gets called in flush function
+      // it is also used in send method below
       unbind() {
         gl.useProgram(null);
       },
 
+      // 3. gets used in flush after this.bind()
       bindAttribs() {
+        // TODO: test this
+        // var texcoordLocation = gl.getAttribLocation(id, "a_uv");
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, STRIDE * 4, 0);
         gl.enableVertexAttribArray(0);
         gl.vertexAttribPointer(1, 2, gl.FLOAT, false, STRIDE * 4, 12);
@@ -180,25 +188,29 @@ export default function gfxInit(gl, gconf) {
         gl.enableVertexAttribArray(2);
       },
 
+      // uniform is {}
+      // 1. gets called first in flush function
       send(uniform) {
         this.bind();
         // TODO: slow for vec2
         for (const name in uniform) {
           const val = uniform[name];
           const loc = gl.getUniformLocation(id, name);
+          // It handles 5 Data types
           if (typeof val === "number") {
+            // 1. if the value is number then we call .uniform1f
             gl.uniform1f(loc, val);
           } else if (isMat4(val)) {
-            // @ts-ignore
+            // 2. if the value is mat4 then we call .uniformMatrix4fv
             gl.uniformMatrix4fv(loc, false, new Float32Array(val.m));
           } else if (isColor(val)) {
-            // @ts-ignore
+            // 3. if the value is color then we call .uniform4f
             gl.uniform4f(loc, val.r, val.g, val.b, val.a);
           } else if (isVec3(val)) {
-            // @ts-ignore
+            // 4. if the value is vec3 then we call .uniform3f
             gl.uniform3f(loc, val.x, val.y, val.z);
           } else if (isVec2(val)) {
-            // @ts-ignore
+            // 5. if the value is vec2 then we call .uniform2f
             gl.uniform2f(loc, val.x, val.y);
           }
         }
@@ -208,6 +220,7 @@ export default function gfxInit(gl, gconf) {
   }
 
   // Lesson 1.2
+  // data => ImageData
   function makeTex(data) {
     const id = gl.createTexture();
 
@@ -219,12 +232,18 @@ export default function gfxInit(gl, gconf) {
     // TODO
     const wrap = (() => {
       if (powerOfTwo(data.width) && powerOfTwo(data.height)) {
+        // repeats texture in certain direction
         return gl.REPEAT;
       } else {
+        // https://webglfundamentals.org/webgl/lessons/webgl-3d-textures.html
+        // You can tell WebGL to not repeat the texture in a certain direction by using CLAMP_TO_EDGE
         return gl.CLAMP_TO_EDGE;
       }
     })();
 
+    // TEXTURE_MIN_FILTER is the setting used when the size you are drawing is smaller
+    // than the largest mip.TEXTURE_MAG_FILTER is the setting used when the size you are
+    // drawing is larger than the largest mip.
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
     gl.bindTexture(gl.TEXTURE_2D, null);
@@ -232,9 +251,11 @@ export default function gfxInit(gl, gconf) {
     return {
       width: data.width,
       height: data.height,
+      // gets called in flush function
       bind() {
         gl.bindTexture(gl.TEXTURE_2D, id);
       },
+      // gets called in flush function
       unbind() {
         gl.bindTexture(gl.TEXTURE_2D, null);
       },
@@ -271,11 +292,14 @@ export default function gfxInit(gl, gconf) {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, QUEUE_COUNT * 2, gl.DYNAMIC_DRAW);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
+    // prettier-ignore
     const bgTex = makeTex(
       new ImageData(
         new Uint8ClampedArray([
-          128, 128, 128, 255, 190, 190, 190, 255, 190, 190, 190, 255, 128, 128,
-          128, 255,
+          128, 128, 128, 255,
+          190, 190, 190, 255,
+          190, 190, 190, 255,
+          128, 128, 128, 255,
         ]),
         2,
         2
@@ -372,12 +396,16 @@ export default function gfxInit(gl, gconf) {
       return;
     }
 
+    window.gfx = gfx;
+
     gfx.curProg.send(gfx.curUniform);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, gfx.vbuf);
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(gfx.vqueue));
+
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gfx.ibuf);
     gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, 0, new Uint16Array(gfx.iqueue));
+
     gfx.curProg.bind();
     gfx.curProg.bindAttribs();
     gfx.curTex.bind();
