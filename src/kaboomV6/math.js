@@ -13,9 +13,21 @@ function clamp(val, min, max) {
   return Math.min(Math.max(val, min), max);
 }
 
-function lerp(a, b, t) {
-  return a + (b - a) * t;
+// THIS IS THE ONLY OPERATION WE CAN DO WITH points other than add/ subtracing and multiplying
+function lerp(p1, p2, t) {
+  return p1 + (p2 - p1) * t;
 }
+// lerp2
+function lerp2(p1, p2, t) {
+  return (1 - t) * p1 + t * p2;
+}
+
+// general formula
+// P = x1p1 + x2p2 + x3p3 ...such that x1 + x2 + .... + xn = 1
+// This is called Affine Combination of Points
+// https://en.wikipedia.org/wiki/Affine_combination
+// and vectors and points are called Affine Space
+// this is the way we figure out points and vectors and figure everything out
 
 function map(v, l1, h1, l2, h2) {
   return l2 + ((v - l1) / (h1 - l1)) * (h2 - l2);
@@ -77,8 +89,13 @@ function vec2(...args) {
       return this.x * p2.x + this.y + p2.y;
     },
     angle(...args) {
+      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/atan2
+      // The Math.atan2() function returns the angle in the plane
+      // (in radians) between the positive x - axis and the ray
+      // from(0, 0) to the point(x, y), for Math.atan2(y, x).`;
       const p2 = vec2(...args);
-      return Math.atan2(this.y - p2.y, this.x - p2.x);
+      const diffVec = this.sub(p2);
+      return Math.atan2(diffVec.y, diffVec.x);
     },
     lerp(p2, t) {
       return vec2(lerp(this.x, p2.x, t), lerp(this.y, p2.y, t));
@@ -291,83 +308,60 @@ function mat4(m) {
       );
     },
 
+    // prettier-ignore
     translate(p) {
       return this.mult(
-        mat4([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, p.x, p.y, 0, 1])
+        mat4([
+          1,   0,   0, 0,
+          0,   1,   0, 0,
+          0,   0,   1, 0,
+          p.x, p.y, 0, 1])
       );
     },
 
+    // prettier-ignore
     scale(s) {
       return this.mult(
-        mat4([s.x, 0, 0, 0, 0, s.y, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
+        mat4([
+          s.x, 0,   0, 0,
+          0,   s.y, 0, 0, 
+          0,   0,   1, 0, 
+          0,   0,   0, 1])
       );
     },
 
+    // prettier-ignore
     rotateX(a) {
       return this.mult(
         mat4([
-          1,
-          0,
-          0,
-          0,
-          0,
-          Math.cos(a),
-          -Math.sin(a),
-          0,
-          0,
-          Math.sin(a),
-          Math.cos(a),
-          0,
-          0,
-          0,
-          0,
-          1,
+          1, 0,            0,           0,
+          0, Math.cos(a), -Math.sin(a), 0,
+          0, Math.sin(a),  Math.cos(a), 0,
+          0, 0,            0,           1,
         ])
       );
     },
 
+    // prettier-ignore
     rotateY(a) {
       return this.mult(
         mat4([
-          Math.cos(a),
-          0,
-          -Math.sin(a),
-          0,
-          0,
-          1,
-          0,
-          0,
-          Math.sin(a),
-          0,
-          Math.cos(a),
-          0,
-          0,
-          0,
-          0,
-          1,
+          Math.cos(a), 0, -Math.sin(a), 0,
+          0,           1,  0,           0,
+          Math.sin(a), 0,  Math.cos(a), 0,
+          0,           0,  0,           1,
         ])
       );
     },
 
+    // prettier-ignore
     rotateZ(a) {
       return this.mult(
         mat4([
-          Math.cos(a),
-          -Math.sin(a),
-          0,
-          0,
-          Math.sin(a),
-          Math.cos(a),
-          0,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          1,
+          Math.cos(a), -Math.sin(a), 0, 0,
+          Math.sin(a),  Math.cos(a), 0, 0,
+          0,            0,           1, 0,
+          0,            0,           0, 1,
         ])
       );
     },

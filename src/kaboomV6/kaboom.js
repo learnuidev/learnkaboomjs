@@ -22,6 +22,8 @@ import {
   rad2deg,
 } from "./math";
 
+import { deepEq } from "./utils";
+
 import { originPt, gfxInit } from "./gfx";
 
 import { appInit } from "./app";
@@ -332,6 +334,7 @@ const kaboom = (
     }
   }
 
+  // Camera Lesson 1 Camera Pos
   function camPos(...pos) {
     if (pos.length > 0) {
       game.cam.pos = vec2(...pos);
@@ -339,6 +342,10 @@ const kaboom = (
     return game.cam.pos.clone();
   }
 
+  // Camera Lesson 2 Camera Scale
+  // function:
+  // camScale() ===  game.cam.scale => false
+  // deepEq(camScale(), game.cam.scale) => true
   function camScale(...scale) {
     if (scale.length > 0) {
       game.cam.scale = vec2(...scale);
@@ -346,6 +353,7 @@ const kaboom = (
     return game.cam.scale.clone();
   }
 
+  // Camera Lesson 3: Camera Rotation
   function camRot(angle) {
     if (angle !== undefined) {
       game.cam.angle = angle;
@@ -849,16 +857,169 @@ const kaboom = (
 
     // calculate camera matrix
     const size = vec2(gfx.width(), gfx.height());
-    const cam = game.cam;
-    const shake = vec2FromAngle(rand(0, Math.PI * 2)).scale(cam.shake);
+    const shake = vec2FromAngle(rand(0, Math.PI * 2)).scale(game.cam.shake);
 
-    cam.shake = lerp(cam.shake, 0, 5 * dt());
-    game.camMatrix = mat4()
+    const camMatrix = mat4();
+
+    // LEARNUI: try changing dt() to
+    // the following values: 1, 0.1, 0.01 and see what happens
+    // console.log(lerp(game.cam.shake, 0, 5 * dt()));
+    // 5 * dt() is roughly = 0.1666899999999938
+    // game.cam.shake = lerp(game.cam.shake, 0, 5 * dt());
+    // game.cam.shake = lerp(game.cam.shake, 0, 5 * 1); // doesnt work
+    // game.cam.shake = lerp(game.cam.shake, 0, 5 * 0.1); // as good as it gets
+    // game.cam.shake = lerp(game.cam.shake, 0, 5 * 0.01); // needs more shaking
+
+    // LEARNUI: If you disable this, camera Matrix DONT work
+    game.camMatrix = camMatrix
+      .clone()
+      .scale(game.cam.scale) // handles scaling of camera
+      // Rotate: handles tilting
+      .rotateZ(game.cam.angle)
+      // .rotateY(game.cam.angle)
+      // .rotateX(game.cam.angle)
+      // Translate
       .translate(size.scale(0.5))
-      .scale(cam.scale)
-      .rotateZ(cam.angle)
       .translate(size.scale(-0.5))
-      .translate(cam.pos.scale(-1).add(size.scale(0.5)).add(shake));
+      .translate(game.cam.pos.scale(-1).add(size.scale(0.5)).add(shake));
+
+    // Tutorial
+    // Part 0: Setup
+    var res;
+    window.camMatrixClone = camMatrix;
+    window.camMatrix = game.camMatrix;
+
+    window.gameFrame = {
+      size,
+      shake,
+    };
+
+    // Part 1: Translate Lesson
+    // size
+    res = { x: 640, y: 480 };
+
+    // size.clone().scale(0.5)
+    res = { x: 320, y: 240 };
+    // window.camMatrix.translate({x: 320, y: 240 }) =>
+    // prettier-ignore
+    res = [1,   0,   0, 0,
+           0,   1,   0, 0, 
+           0,   0,   1, 0, 
+           320, 240, 0, 1];
+    // Notice: when you run translate it affects the last row x and y values
+    // lets try now with scale(-0.5)
+    // size.clone().scale(0.5)
+    res = { x: -320, y: -240 };
+    // window.camMatrix.translate({x: 320, y: 240 }) =>
+    // prettier-ignore
+    res = [ 1,    0,   0, 0,
+            0,    1,   0, 0, 
+            0,    0,   1, 0, 
+           -320, -240, 0, 1];
+    // Notice: the result is same as before, except the sign is flipped
+    // Part 2: Scale Lesson (camScale)
+    // camMatrix
+    // [ 1, 0, 0, 0,
+    //   0, 1, 0, 0,
+    //   0, 0, 1, 0,
+    //   0, 0, 0, 1]
+
+    // camMatrix.scale(3, 3); =>
+    // [ NaN, NaN, NaN, NaN,
+    //   NaN, NaN, NaN, NaN,
+    //   0,   0,   1,   0,
+    //   0,   0,   0,   1]
+    // the argument needs to be a vector
+    // camMatrix.scale(vec2(3,3))
+    // [ 3, 0, 0, 0,
+    //   0, 3, 0, 0,
+    //   0, 0, 1, 0,
+    //   0, 0, 0, 1]
+    // still the same messagge => refresh the page
+
+    // Part 3: Rotation (camRot)
+    // What happens when we rotate in x axis
+    // game.camMatrix = camMatrix
+    //   .clone()
+    //   .translate(size.scale(0.5))
+    //   .scale(game.cam.scale) // handles scaling of camera
+    //   // .rotateZ(game.cam.angle)
+    //   // custom
+    //   .rotateX(game.cam.angle)
+    //   .translate(size.scale(-0.5));
+    // camMatrix
+    // prettier-ignore
+    res = [ 1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1]
+
+    // camRot(1)
+    // is same as: game.cam.angle = 1
+    // camMatrix
+    // prettier-ignore
+    res = [ 1, 0,                   0,                   0,
+            0, 0.5403023058681398, -0.8414709848078965,  0,
+            0, 0.8414709848078965,  0.5403023058681398,  0, 
+            0, 110.32744659164646,  201.95303635389516,  1,
+    ];
+    // comment: notice x is unchanged
+    // image: height gets squished
+
+    // 3.2 Rotation in Y axis
+    //   .clone()
+    //   .translate(size.scale(0.5))
+    //   .scale(game.cam.scale) // handles scaling of camera
+    //   // .rotateZ(game.cam.angle)
+    //   // custom
+    //   .rotateY(game.cam.angle)
+    //   .translate(size.scale(-0.5));
+
+    // lets see what happens when we change the angle
+    // game.cam.angle = 1
+    // camMatrix.m
+    // prettier-ignore
+    res = [
+      0.5403023058681398, 0, -0.8414709848078965, 0,
+      0,                  1,  0,                  0,
+      0.8414709848078965, 0,  0.5403023058681398, 0,
+      147.10326212219528, 0,  269.2707151385269,  1,
+    ];
+    // comment:
+    // - image: width gets squished
+    // - Notice only x and z values changed
+
+    // 3.3 Rotation in Z axis - THIS WORKS
+    // game.camMatrix = camMatrix
+    //   .clone()
+    //   .translate(size.scale(0.5))
+    //   .scale(game.cam.scale) // handles scaling of camera
+    //   .rotateZ(game.cam.angle)
+    //   .translate(size.scale(-0.5));
+    // camMatrix.m
+    // prettier-ignore
+    res = [ 1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1]
+
+    // camRot(1)
+    // is same as: game.cam.angle = 1
+    // camMatrix.m
+    // prettier-ignore
+    res = [
+      0.5403023058681398, -0.8414709848078965, 0, 0,
+      0.8414709848078965,  0.5403023058681398, 0, 0,
+      0,                   0,                  1, 0, 
+      0,                   0,                  0, 1,
+    ];
+    // Note: Titling works when you rotate in z axis
+    // Note: only x and y values are changed
+    // Notice that the second value is -0.84,
+    // means it wont get displayed on the screen
+    // this is the clipping space
+
+    // Lesson 4: Translate
 
     // draw every obj
     every((obj) => {
@@ -866,6 +1027,7 @@ const kaboom = (
         gfx.pushTransform();
 
         if (isCamLayer(obj.layer)) {
+          // If you disable this, camera Matrix still works
           gfx.pushMatrix(game.camMatrix);
         }
 
@@ -903,6 +1065,7 @@ const kaboom = (
         gfx.scale() * (isCam ? (game.cam.scale.x + game.cam.scale.y) / 2 : 1);
       if (isCam) {
         gfx.pushTransform();
+        // If you disable this, camera Matrix still works
         gfx.pushMatrix(game.camMatrix);
       }
       f(scale);
@@ -979,6 +1142,7 @@ const kaboom = (
       },
 
       screenPos() {
+        // If you disable this, camera Matrix still works
         return game.camMatrix.multVec2(this.pos);
       },
 
@@ -1881,6 +2045,7 @@ const kaboom = (
       };
 
       game.camMousePos = app.mousePos();
+      // If you disable this, camera Matrix still works
       game.camMatrix = mat4();
 
       game.layers = {};
@@ -2007,6 +2172,7 @@ const kaboom = (
     rand,
     randSeed,
     vec2,
+    mat4,
     rgb,
     rgba,
     quad,
@@ -2044,6 +2210,7 @@ const kaboom = (
     game,
     reg_comp,
     get_comp,
+    deepEq,
   };
 
   if (gconf.plugins) {
@@ -2089,6 +2256,7 @@ const kaboom = (
     } else {
       try {
         // TODO: this gives the latest mousePos in input handlers but uses cam matrix from last frame
+        // If you disable this, camera Matrix still works
         game.camMousePos = game.camMatrix.invert().multVec2(app.mousePos());
         game.trigger("input");
         gameFrame();
