@@ -6,7 +6,7 @@ function App() {
     global: true,
     width: 640,
     height: 480,
-    fullscreen: true,
+    // fullscreen: true,
     scale: 1,
   });
 
@@ -17,9 +17,9 @@ function App() {
   // loading indicator indicates that loaders are working
 
   k.loadSprite("sprite/bg", "img/bg.png");
-  // k.loadSprite("sprite/bg1", "img/bg.png");
-  // k.loadSprite("sprite/bg2", "img/bg.png");
-  // k.loadSprite("sprite/bg3", "img/bg.png");
+  k.loadSprite("sprite/bg1", "img/bg.png");
+  k.loadSprite("sprite/bg2", "img/bg.png");
+  k.loadSprite("sprite/bg3", "img/bg.png");
   return <div className="App"> Mini Kaboom</div>;
 }
 

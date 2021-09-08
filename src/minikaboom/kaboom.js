@@ -3,6 +3,7 @@
 import appInit from "./app";
 import gfxInit from "./gfx";
 import { audioInit } from "./../kaboomV6/audio";
+import { vec3 } from "../kaboomV6/math";
 
 // LESSON 3
 import { assetsInit } from "./assets";
@@ -57,6 +58,8 @@ function kaboom(
   const ctx = {
     loadRoot: assets.loadRoot,
     loadSprite: assets.loadSprite,
+    // Math
+    vec3,
   };
 
   if (gconf.global) {
