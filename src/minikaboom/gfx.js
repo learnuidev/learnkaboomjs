@@ -25,6 +25,8 @@ const BG_GRID_SIZE = 64;
 
 // uv = texture coordinate
 const VERT_TEMPLATE = `
+// uncomment this to see the error message
+// attribute vec3 a_poss;
 attribute vec3 a_pos;
 attribute vec2 a_uv;
 attribute vec4 a_color;
@@ -159,32 +161,124 @@ export default function gfxInit(gconf) {
     let msg;
     const vcode = VERT_TEMPLATE.replace("{{user}}", vertSrc || DEF_VERT);
     const fcode = FRAG_TEMPLATE.replace("{{user}}", fragSrc || DEF_FRAG);
+    // Step 1: Create Vertex and Fragment shaders
+    // gl.createShader returns a creates an empty shader object of type WebGLShader
+    // A shader object is used to maintain the source code strings that define a gl.shaderType indicates
+    // the type of shader to be created.
+    // Two types of shaders are supported.
+    // 1. A shader of type VERTEX_SHADER is a shader that is intended to run on the programmable vertex processor.
+    // 2. A shader of type FRAGMENT_SHADER is a shader that is intended to run on the programmable fragment processor.
     const vertShader = gl.createShader(gl.VERTEX_SHADER);
-    window.vertShader = vertShader;
     const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
 
+    // Step 2: Attach source code to shaders
+    // gl.shaderSource - Resets the source code in a shader object
+    // Parameter (2)
+    // shader (object): Specifies the handle of the shader object whose source code is to be replaced.
+    // code   (string): Specifies the source code to be loaded into the shader.
     gl.shaderSource(vertShader, vcode);
     gl.shaderSource(fragShader, fcode);
+
+    // Step 3: Compile shaders
+    // https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glCompileShader.xml
+    // gl.compileShader
+    // - compiles the source code strings that have been stored in the shader object specified by shader.
     gl.compileShader(vertShader);
     gl.compileShader(fragShader);
 
+    window.vertShader = vertShader;
+    window.fragShader = fragShader;
+
+    // Step 4: Check for Compilation Errors
+    // gl.getShaderInfoLog — return the information log for a shader object
+    // Parameters (1)
+    // shader - Specifies the shader object whose information log is to be queried.
+    // When a shader object is created, its information log will be a string of length 0.
+    // aka if there is anything wrong with our shaders, this function will capture and throw it
+    // https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glGetShaderInfoLog.xml
     if ((msg = gl.getShaderInfoLog(vertShader))) {
+      window.vertError = msg;
       throw new Error(msg);
     }
 
     if ((msg = gl.getShaderInfoLog(fragShader))) {
+      window.fragError = msg;
       throw new Error(msg);
     }
+    // Exercise
+    // To see the error in action,  try modifying either VERTEX_TEMPLATE or FRAGMENT_TEMPLATE defined above
+    // and try to see what the content of window.vertError or window.fragError looks like
 
+    // Example A: Vertex Error: vertError
+    // In line 28 if i change "attribute vec3 a_pos" to "attribute vec3 a_poss", I will get this error, if I type
+    // window.vertError on the console
+    // "ERROR: 0:11: 'a_pos' : undeclared identifier\nERROR: 0:11: 'constructor' : not enough data
+    // provided for construction\nERROR: 0: 21: 'a_pos' : undeclared identifier\nERROR: 0: 21: 'vert' :
+    // no matching overloaded function found\nERROR: 0: 21: '=' : dimension mismatch\nERROR: 0: 21: '=' :
+    // cannot convert from 'const mediump float' to 'highp 4-component vector of float'\nERROR: 0: 22: 'a_pos' :
+    // undeclared identifier\nERROR: 0: 22: '=' : di
+
+    // Example B: Fragment Error: Left as exercise
+    // => window.fragError
+
+    // If we have reached this, this means that following things have happened
+    // 0. We have written our vertex and fragment code using glsl language
+    // 1. We have created vertex and fragment shaders (createShader)
+    // 2. We have added vertex and fragment code to our newly created shaders
+    // 3. We have compiled our vertex and fragment source glsl source code that has been stored in the shader object
+    // 4. In case of any complication bug, we thrown the error
+
+    // 5. Finally we are ready to create the program
+    // We can use createProgram method to create a new program.
+    // A program object is an object to which shader objects can be attached.
+    // This provides a mechanism to specify the shader objects that will be linked to
+    // create a program. It also provides a means for checking the compatibility of the shaders
+    // that will be used to create a program (for instance, checking the compatibility between a
+    // vertex shader and a fragment shader). When no longer needed as part of a program object,
+    // shader objects can be detached.
     const id = gl.createProgram();
 
+    // 6. Attach Shaders
+    // Once we have created our program, we have to tell the program more about our code
+    // Before we can start using our shaders in our program, we first have to attach our shaders
+    // This can be done with attachShader method
+    // gl.attachShader — attach a shader object to a program object
+    // Parameters
+    // program - Specifies the program object to which a shader object will be attached.
+    // shader  - Specifies the shader object that is to be attached.
+
+    // Desc:
+    // In order to create an executable, there must be a way to specify the list of things that
+    // will be linked together. Program objects provide this mechanism.Shaders that are to be linked
+    // together in a program object must first be attached to that program gl.attachShader attaches
+    // the shader object specified by shader to the program object specified by program.
+    // This indicates that shader will be included in link operations that will be performed on program.
+    // Once we are done with this step we need to specify
+    // https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glAttachShader.xml
     gl.attachShader(id, vertShader);
     gl.attachShader(id, fragShader);
 
+    // 7. Associate Vertex attriute with index
+    // Once we have attached the shaders
+    // We need to tell the map attribute index with one of the named attribube: "a_pos", "a_uv", "a_color"
+    // defined vertex source code
+    // gl.bindAttribLocation is used to associate a user-defined attribute variable in the program object
+    // specified by program with a generic vertex attribute index.
+    // This is how the program knows which data to look at which location. Since we will be sending data in
+    // buffers(discussed later)
+    // https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glBindAttribLocation.xml
     gl.bindAttribLocation(id, 0, "a_pos");
     gl.bindAttribLocation(id, 1, "a_uv");
     gl.bindAttribLocation(id, 2, "a_color");
 
+    // 8. Link the program
+    // Once we have mapped our custom attributes
+    // glLinkProgram links the program object specified by program.
+    // - If any shader objects of type VERTEX_SHADER are attached to program, they will be
+    //   used to create an executable that will run on the programmable vertex processor.
+    // - If any shader objects of type FRAGMENT_SHADER are attached to program, they will be used to create an
+    //   executable that will run on the programmable fragment processor.
+    // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glLinkProgram.xhtml
     gl.linkProgram(id);
 
     if ((msg = gl.getProgramInfoLog(id))) {
@@ -253,10 +347,27 @@ export default function gfxInit(gconf) {
   // Lesson 1.2
   // data => ImageData
   function makeTex(data) {
+    // Step 1: Create a WebGLTexture
+    // Returns a WebGLTexture object to which images can be bound to.
     const id = gl.createTexture();
 
+    // Step 2: Bind the texture to TEXTURE_2D
+    // bind a named texture to a texturing target with target set to TEXTURE_2D
     gl.bindTexture(gl.TEXTURE_2D, id);
+
+    // window.imageElement = data;
+
+    // Step 3: specify a two-dimensional texture image
+    // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D
+    // Parameters (6)
+    // 1. target - specifies the binding point (target) of the active texture: TEXTURE_2D in this case
+    // 2. level - number specifying level of detail: gl.RGBA = 6408
+    // 3. internalFormat - specified color format in the texture: gl.RGBA = 6408
+    // 4. type - specifying the data type of the texel data: gl.UNSIGNED_BYTE = 5121
+    // 5. data - HTMLImageElement
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, data);
+
+    // Step 4: Set Parameters
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, texFilter);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, texFilter);
 
@@ -277,6 +388,8 @@ export default function gfxInit(gconf) {
     // drawing is larger than the largest mip.
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
+
+    // Step 5: Unbind the texture
     gl.bindTexture(gl.TEXTURE_2D, null);
 
     return {
@@ -448,6 +561,11 @@ export default function gfxInit(gconf) {
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
+    window.iqueue = gfx.iqueue.slice();
+    window.vqueue = gfx.vqueue.slice();
+
+    // What happens if you dont flush
+    // comment it out and see what happens
     gfx.iqueue = [];
     gfx.vqueue = [];
 
@@ -475,6 +593,12 @@ export default function gfxInit(gconf) {
       gfx.vqueue.length + verts.length * STRIDE > QUEUE_COUNT ||
       gfx.iqueue.length + indices.length > QUEUE_COUNT
     ) {
+      // Texture change in action ====
+      window.tex = tex;
+      window.curTex = gfx.curTex;
+      console.log("tex !== gfx.curTex", tex !== gfx.curTex);
+      console.log("GETS CALLED");
+
       flush();
     }
 
@@ -490,8 +614,8 @@ export default function gfxInit(gconf) {
       .map((v) => {
         const pt = toNDC(gfx.transform.multVec2(v.pos.xy()));
         return [
-          pt.x,
-          pt.y,
+          pt.x, // change this to v.pos.x
+          pt.y, // and this to v.pos.y and see what happens on the screen
           v.pos.z,
           v.uv.x,
           v.uv.y,
@@ -520,6 +644,15 @@ export default function gfxInit(gconf) {
     const q = conf.quad || quad(0, 0, 1, 1);
     const z = 1 - (conf.z ?? 0);
     const color = conf.color || rgba(1, 1, 1, 1);
+
+    pushTransform();
+    pushTranslate(pos);
+    pushRotateZ(rot);
+    pushScale(scale);
+    pushTranslate(offset);
+    // pushTranslate({ x: 320, y: 240 });
+    // pushTranslate({ x: 320, y: 140 });
+
     const input = {
       w,
       h,
@@ -528,47 +661,80 @@ export default function gfxInit(gconf) {
       offset,
       scale,
       rot,
-      q,
+      q, // quad
       z,
       color,
     };
 
     window.drawQuadInput = input;
 
-    pushTransform();
-    pushTranslate(pos);
-    pushRotateZ(rot);
-    pushScale(scale);
-    pushTranslate(offset);
+    function createVert({ pos, uv, color }) {
+      return {
+        pos: vec3(pos[0], pos[1], pos[2]),
+        uv: vec2(uv[0], uv[1]),
+        color: rgba(color[0], color[1], color[2], color[3]),
+      };
+    }
 
-    drawRaw(
-      [
-        {
-          pos: vec3(-w / 2, h / 2, z),
-          uv: vec2(conf.flipX ? q.x + q.w : q.x, conf.flipY ? q.y : q.y + q.h),
-          color: color,
-        },
-        {
-          pos: vec3(-w / 2, -h / 2, z),
-          uv: vec2(conf.flipX ? q.x + q.w : q.x, conf.flipY ? q.y + q.h : q.y),
-          color: color,
-        },
-        {
-          pos: vec3(w / 2, -h / 2, z),
-          uv: vec2(conf.flipX ? q.x : q.x + q.w, conf.flipY ? q.y + q.h : q.y),
-          color: color,
-        },
-        {
-          pos: vec3(w / 2, h / 2, z),
-          uv: vec2(conf.flipX ? q.x : q.x + q.w, conf.flipY ? q.y : q.y + q.h),
-          color: color,
-        },
-      ],
-      [0, 1, 3, 1, 2, 3],
-      conf.tex,
-      conf.prog,
-      conf.uniform
-    );
+    const vertsOld = [
+      {
+        pos: vec3(-640 / 2, 480 / 2, z),
+        uv: vec2(conf.flipX ? q.x + q.w : q.x, conf.flipY ? q.y : q.y + q.h),
+        color: color,
+      },
+      {
+        pos: vec3(-640 / 2, -480 / 2, z),
+        uv: vec2(conf.flipX ? q.x + q.w : q.x, conf.flipY ? q.y + q.h : q.y),
+        color: color,
+      },
+      {
+        pos: vec3(640 / 2, -480 / 2, z),
+        uv: vec2(conf.flipX ? q.x : q.x + q.w, conf.flipY ? q.y + q.h : q.y),
+        color: color,
+      },
+      {
+        pos: vec3(640 / 2, 480 / 2, z),
+        uv: vec2(conf.flipX ? q.x : q.x + q.w, conf.flipY ? q.y : q.y + q.h),
+        color: color,
+      },
+    ];
+    const verts = [
+      // Bottom Left
+      createVert({
+        pos: [-640 / 2, 480 / 2, z],
+        uv: [conf.flipX ? q.x + q.w : q.x, conf.flipY ? q.y : q.y + q.h],
+        color: [1, 1, 1, 1],
+      }),
+      // Top Left
+      createVert({
+        pos: [-640 / 2, -480 / 2, z],
+        uv: [conf.flipX ? q.x + q.w : q.x, conf.flipY ? q.y + q.h : q.y],
+        color: [1, 1, 1, 1],
+      }),
+      // Top Right
+      createVert({
+        pos: [640 / 2, -480 / 2, z],
+        uv: [conf.flipX ? q.x : q.x + q.w, conf.flipY ? q.y + q.h : q.y],
+        color: [1, 1, 1, 1],
+      }),
+      // Bottom Right
+      createVert({
+        pos: [640 / 2, 480 / 2, z],
+        uv: [conf.flipX ? q.x : q.x + q.w, conf.flipY ? q.y : q.y + q.h],
+        color: [1, 1, 1, 1],
+      }),
+    ];
+
+    const indices = [0, 1, 3, 1, 2, 3];
+
+    const drawRawInput = {
+      verts,
+      indices,
+    };
+
+    window.drawRawInput = drawRawInput;
+
+    drawRaw(verts, indices, conf.tex, conf.prog, conf.uniform);
 
     popTransform();
   }
@@ -602,7 +768,14 @@ export default function gfxInit(gconf) {
     gfx.lastDrawCalls = gfx.drawCalls;
   }
 
-  return {
+  // window.width = width;
+  // window.height = height;
+
+  const ctx = {
+    // constants
+    STRIDE,
+    BG_GRID_SIZE,
+    //
     width,
     height,
     scale,
@@ -625,4 +798,10 @@ export default function gfxInit(gconf) {
     //  drawCalls,
     //  clearColor,
   };
+
+  for (const item in ctx) {
+    window[item] = ctx[item];
+  }
+
+  return ctx;
 }
