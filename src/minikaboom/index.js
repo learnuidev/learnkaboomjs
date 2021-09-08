@@ -17,6 +17,9 @@ function App() {
   // loading indicator indicates that loaders are working
 
   k.loadSprite("sprite/bg", "img/bg.png");
+  // k.loadSprite("sprite/bg1", "img/bg.png");
+  // k.loadSprite("sprite/bg2", "img/bg.png");
+  // k.loadSprite("sprite/bg3", "img/bg.png");
   return <div className="App"> Mini Kaboom</div>;
 }
 
