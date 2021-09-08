@@ -2,8 +2,10 @@
 
 import appInit from "./app";
 import gfxInit from "./gfx";
-// import { audioInit } from "./../kaboomV6/audio";
-// import { assetsInit, DEF_FONT } from "../kaboomV6/assets";
+import { audioInit } from "./../kaboomV6/audio";
+
+// LESSON 3
+import { assetsInit } from "./assets";
 
 function kaboom(
   gconf = {
@@ -40,17 +42,22 @@ function kaboom(
   console.log("gfx", gfx);
 
   // Part C: Audio
-  // const audio = audioInit();
+  const audio = audioInit();
 
   // Pard D: Assets
-  // const assets = assetsInit(gfx, audio, {
-  //   errHandler: (err) => {
-  //     console.log("assets error", err);
-  //   },
-  // });
+  const assets = assetsInit(gfx, audio, {
+    errHandler: (err) => {
+      console.log("assets error", err);
+    },
+  });
+
+  window.assets = assets;
 
   // context
-  const ctx = {};
+  const ctx = {
+    loadRoot: assets.loadRoot,
+    loadSprite: assets.loadSprite,
+  };
 
   if (gconf.global) {
     for (const k in ctx) {
