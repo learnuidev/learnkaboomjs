@@ -11,8 +11,11 @@ import {
   isColor,
   isMat4,
 } from "../kaboomV6/math";
+import * as math from "../kaboomV6/math";
 
 import { deepEq } from "../kaboomV6/utils";
+
+window.math = math;
 
 // constants
 const DEF_ORIGIN = "topleft";
@@ -112,6 +115,7 @@ function originPt(orig) {
 
 export default function gfxInit(gl, gconf) {
   console.log("gl", gl);
+  window.gl = gl;
 
   const texFilter = (() => {
     switch (gconf.texFilter) {
@@ -125,11 +129,30 @@ export default function gfxInit(gl, gconf) {
   })();
 
   // Lesson 1.1
+
+  function createShader(type, code) {
+    let msg;
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, code);
+    gl.compileShader(shader);
+
+    if ((msg = gl.getShaderInfoLog(shader))) {
+      throw new Error(msg);
+    }
+
+    if ((msg = gl.getShaderInfoLog(shader))) {
+      throw new Error(msg);
+    }
+
+    return shader;
+  }
+
   function makeProgram(vertSrc = DEF_VERT, fragSrc = DEF_FRAG) {
     let msg;
-    const vcode = VERT_TEMPLATE.replace("{{user}}", vertSrc ?? DEF_VERT);
-    const fcode = FRAG_TEMPLATE.replace("{{user}}", fragSrc ?? DEF_FRAG);
+    const vcode = VERT_TEMPLATE.replace("{{user}}", vertSrc || DEF_VERT);
+    const fcode = FRAG_TEMPLATE.replace("{{user}}", fragSrc || DEF_FRAG);
     const vertShader = gl.createShader(gl.VERTEX_SHADER);
+    window.vertShader = vertShader;
     const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
 
     gl.shaderSource(vertShader, vcode);
@@ -365,7 +388,9 @@ export default function gfxInit(gl, gconf) {
     if (!p || (p.x === 1 && p.y === 1)) {
       return;
     }
-    gfx.transform = gfx.transform.scale(p);
+    const scaled = gfx.transform.scale(p);
+    window.pushScaled = scaled;
+    gfx.transform = scaled;
   }
 
   function pushRotateZ(a) {
@@ -482,10 +507,25 @@ export default function gfxInit(gl, gconf) {
     const origin = originPt(conf.origin || DEF_ORIGIN);
     const offset = origin.scale(vec2(w, h).scale(-0.5));
     const scale = vec2(conf.scale ?? 1);
+
     const rot = conf.rot || 0;
     const q = conf.quad || quad(0, 0, 1, 1);
     const z = 1 - (conf.z ?? 0);
     const color = conf.color || rgba(1, 1, 1, 1);
+    const input = {
+      w,
+      h,
+      pos,
+      origin,
+      offset,
+      scale,
+      rot,
+      q,
+      z,
+      color,
+    };
+
+    window.drawQuadInput = input;
 
     pushTransform();
     pushTranslate(pos);
@@ -529,7 +569,7 @@ export default function gfxInit(gl, gconf) {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     if (!gconf.clearColor) {
-      drawQuad({
+      const opts = {
         width: width(),
         height: height(),
         quad: quad(
@@ -539,7 +579,9 @@ export default function gfxInit(gl, gconf) {
           (height() * scale()) / BG_GRID_SIZE
         ),
         tex: gfx.bgTex,
-      });
+      };
+      window.opts = opts;
+      drawQuad(opts);
     }
 
     gfx.drawCalls = 0;
