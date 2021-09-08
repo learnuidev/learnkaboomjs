@@ -1,7 +1,7 @@
 import kaboom from "./kaboom";
 
 function App() {
-  kaboom({
+  const k = kaboom({
     canvas: document.getElementById("app"),
     global: true,
     width: 640,
@@ -9,6 +9,14 @@ function App() {
     fullscreen: true,
     scale: 1,
   });
+
+  k.loadRoot("https://kaboomjs.com/pub/examples/");
+
+  // Task: 1 Disable all the loaders, and refresh the screen
+  // and see what happens
+  // loading indicator indicates that loaders are working
+
+  k.loadSprite("sprite/bg", "img/bg.png");
   return <div className="App"> Mini Kaboom</div>;
 }
 
