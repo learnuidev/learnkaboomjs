@@ -113,7 +113,15 @@ function originPt(orig) {
   }
 }
 
-export default function gfxInit(gl, gconf) {
+export default function gfxInit(gconf) {
+  // webgl context
+  const gl = gconf.canvas.getContext("webgl", {
+    antialias: true,
+    depth: true,
+    stencil: true,
+    alpha: true,
+    preserveDrawingBuffer: true,
+  });
   console.log("gl", gl);
   window.gl = gl;
 

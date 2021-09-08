@@ -79,17 +79,9 @@ export default function appInit(gconf) {
     fpsTimer: 0,
   };
 
+  // Full Screen + Style
   setFullScreen(gconf, app);
   setStyle(gconf, app);
-
-  // webgl context
-  const gl = app.canvas.getContext("webgl", {
-    antialias: true,
-    depth: true,
-    stencil: true,
-    alpha: true,
-    preserveDrawingBuffer: true,
-  });
 
   function run(f) {
     const frame = (t) => {
@@ -138,7 +130,6 @@ export default function appInit(gconf) {
   }
 
   return {
-    gl,
     run,
     quit,
   };

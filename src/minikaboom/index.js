@@ -6,6 +6,7 @@ function App() {
     global: true,
     width: 640,
     height: 480,
+    fullscreen: true,
     scale: 1,
   });
   return <div className="App"> Mini Kaboom</div>;
