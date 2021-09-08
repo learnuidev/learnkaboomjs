@@ -36,7 +36,7 @@ function kaboom(
   // console.log("APP", app);
 
   // Part B: GFX
-  const gfx = gfxInit(app.gl, gconf);
+  const gfx = gfxInit(gconf);
   console.log("gfx", gfx);
 
   // Part C: Audio
