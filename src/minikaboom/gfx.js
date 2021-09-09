@@ -305,12 +305,47 @@ export default function gfxInit(gconf) {
       bindAttribs() {
         // TODO: test this
         // var texcoordLocation = gl.getAttribLocation(id, "a_uv");
-        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, STRIDE * 4, 0);
-        gl.enableVertexAttribArray(0);
-        gl.vertexAttribPointer(1, 2, gl.FLOAT, false, STRIDE * 4, 12);
-        gl.enableVertexAttribArray(1);
-        gl.vertexAttribPointer(2, 4, gl.FLOAT, false, STRIDE * 4, 20);
-        gl.enableVertexAttribArray(2);
+        const attribs = {
+          pos: {
+            location: 0,
+            size: 3,
+            type: gl.FLOAT,
+            normalize: false,
+            stride: STRIDE * 4,
+            offset: 0,
+          },
+          uv: {
+            location: 1,
+            size: 2,
+            type: gl.FLOAT,
+            normalize: false,
+            stride: STRIDE * 4,
+            offset: 12,
+          },
+          color: {
+            location: 2,
+            size: 4,
+            type: gl.FLOAT,
+            normalize: false,
+            stride: STRIDE * 4,
+            offset: 20,
+          },
+        };
+
+        // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+        for (const k in attribs) {
+          const attrib = attribs[k];
+          gl.vertexAttribPointer(
+            attrib.location,
+            attrib.size,
+            attrib.type,
+            attrib.normalize,
+            attrib.stride,
+            attrib.offset
+          );
+          // Turn on the attributes
+          gl.enableVertexAttribArray(attrib.location);
+        }
       },
 
       // uniform is {}
@@ -440,9 +475,15 @@ export default function gfxInit(gconf) {
     const bgTex = makeTex(
       new ImageData(
         new Uint8ClampedArray([
+          // ==== First Row
+          // dark grey
           128, 128, 128, 255,
+          // light grey
           190, 190, 190, 255,
+          // ==== Second Row
+          // light grey
           190, 190, 190, 255,
+          // dark grey
           128, 128, 128, 255,
         ]),
         2,
@@ -676,28 +717,28 @@ export default function gfxInit(gconf) {
       };
     }
 
-    const vertsOld = [
-      {
-        pos: vec3(-640 / 2, 480 / 2, z),
-        uv: vec2(conf.flipX ? q.x + q.w : q.x, conf.flipY ? q.y : q.y + q.h),
-        color: color,
-      },
-      {
-        pos: vec3(-640 / 2, -480 / 2, z),
-        uv: vec2(conf.flipX ? q.x + q.w : q.x, conf.flipY ? q.y + q.h : q.y),
-        color: color,
-      },
-      {
-        pos: vec3(640 / 2, -480 / 2, z),
-        uv: vec2(conf.flipX ? q.x : q.x + q.w, conf.flipY ? q.y + q.h : q.y),
-        color: color,
-      },
-      {
-        pos: vec3(640 / 2, 480 / 2, z),
-        uv: vec2(conf.flipX ? q.x : q.x + q.w, conf.flipY ? q.y : q.y + q.h),
-        color: color,
-      },
-    ];
+    // const vertsOld = [
+    //   {
+    //     pos: vec3(-640 / 2, 480 / 2, z),
+    //     uv: vec2(conf.flipX ? q.x + q.w : q.x, conf.flipY ? q.y : q.y + q.h),
+    //     color: color,
+    //   },
+    //   {
+    //     pos: vec3(-640 / 2, -480 / 2, z),
+    //     uv: vec2(conf.flipX ? q.x + q.w : q.x, conf.flipY ? q.y + q.h : q.y),
+    //     color: color,
+    //   },
+    //   {
+    //     pos: vec3(640 / 2, -480 / 2, z),
+    //     uv: vec2(conf.flipX ? q.x : q.x + q.w, conf.flipY ? q.y + q.h : q.y),
+    //     color: color,
+    //   },
+    //   {
+    //     pos: vec3(640 / 2, 480 / 2, z),
+    //     uv: vec2(conf.flipX ? q.x : q.x + q.w, conf.flipY ? q.y : q.y + q.h),
+    //     color: color,
+    //   },
+    // ];
     const verts = [
       // Bottom Left
       createVert({
@@ -740,8 +781,16 @@ export default function gfxInit(gconf) {
   }
 
   function frameStart() {
+    // Step 1: Clear the canvas
     gl.clear(gl.COLOR_BUFFER_BIT);
 
+    // Step 2: If user has not provided clearColor, draw the grey checked backround
+    // drawQuad (checked backround)
+    // Parameters
+    //  width  - number
+    //  height - number
+    //  quad   - quad
+    //  tex    - texture
     if (!gconf.clearColor) {
       const opts = {
         width: width(),
@@ -752,19 +801,29 @@ export default function gfxInit(gconf) {
           (width() * scale()) / BG_GRID_SIZE,
           (height() * scale()) / BG_GRID_SIZE
         ),
-        tex: gfx.bgTex,
+        tex: gfx.bgTex, // this creates grid in the background
       };
       window.opts = opts;
       drawQuad(opts);
     }
 
+    // Step 3: Reset state
+    // Attributes
+    // - drawCalls = 0
+    // - transformStack = []
+    // - transform = mat4()
+    // Exercise: comment drawCalls and see what happens
     gfx.drawCalls = 0;
     gfx.transformStack = [];
     gfx.transform = mat4();
+
+    // console.log("gets called");
   }
 
   function frameEnd() {
+    // Step 1: Call flush
     flush();
+    // Step 2: set lastDrawCalls to drawCalls
     gfx.lastDrawCalls = gfx.drawCalls;
   }
 
@@ -797,6 +856,8 @@ export default function gfxInit(gconf) {
     pushMatrix,
     //  drawCalls,
     //  clearColor,
+    // NEW
+    createShader,
   };
 
   for (const item in ctx) {

@@ -1,5 +1,8 @@
 import { vec2 } from "../kaboomV6/math";
 
+// Utils
+import { global } from "./utils";
+
 const keyMap = {
   ArrowLeft: "left",
   ArrowRight: "right",
@@ -129,8 +132,18 @@ export default function appInit(gconf) {
     app.stopped = true;
   }
 
-  return {
+  const ctx = {
     run,
     quit,
+
+    // Meta
+    keyMap,
+    preventDefaultKeys,
   };
+
+  // Make everything global for interative development
+  // experience
+  global(ctx);
+
+  return ctx;
 }

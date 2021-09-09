@@ -563,6 +563,7 @@ export {
   choose,
   clamp,
   lerp,
+  lerp2,
   map,
   mapc,
   wave,
