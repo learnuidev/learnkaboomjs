@@ -5,6 +5,9 @@ import gfxInit from "./gfx";
 import { audioInit } from "./../kaboomV6/audio";
 import { vec3 } from "../kaboomV6/math";
 
+// util
+import { global } from "./utils";
+
 // LESSON 3
 import { assetsInit } from "./assets";
 
@@ -22,8 +25,8 @@ function kaboom(
     root: document.body,
   }
 ) {
-  console.log("kaboom", gconf);
-  window.gconf = gconf;
+  // console.log("kaboom", gconf);
+  // window.gconf = gconf;
 
   // Part A: APP
   const app = appInit({
@@ -63,9 +66,7 @@ function kaboom(
   };
 
   if (gconf.global) {
-    for (const k in ctx) {
-      window[k] = ctx[k];
-    }
+    global(ctx);
   }
 
   app.run(() => {
